@@ -24,35 +24,35 @@ A secure, end-to-end encrypted messaging web application. Messages are encrypted
 WhisperBox is a **frontend-only** application backed by a pre-built REST + WebSocket API. All cryptographic operations happen exclusively in the browser using the native [Web Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API). No cryptographic library dependencies — zero attack surface from third-party crypto code.
 
 ```ts
-┌─────────────────────────────────────────────────────────────────────┐
-│                          Browser (Client)                           │
-│                                                                     │
-│  ┌─────────────┐    ┌──────────────────┐    ┌───────────────────┐  │
-│  │  React UI   │◄──►│  Zustand Stores  │◄──►│  Web Crypto API   │  │
-│  │  (Vite/TSX) │    │  (auth, crypto,  │    │  (RSA-OAEP +      │  │
-│  │             │    │   presence)      │    │   AES-GCM +       │  │
-│  └──────┬──────┘    └──────────────────┘    │   PBKDF2)         │  │
-│         │                                   └─────────┬─────────┘  │
-│         │           ┌──────────────────┐              │            │
-│         │           │    IndexedDB     │◄─────────────┘            │
-│         │           │  (wrapped keys)  │  persist wrapped           │
-│         │           └──────────────────┘  private key              │
-│         │                                                           │
-│  ┌──────▼──────────────────────────────────────────────────────┐   │
-│  │                   Axios + WebSocket                          │   │
-│  │   • Bearer token on every request                           │   │
-│  │   • Silent token refresh interceptor (401 → /auth/refresh)  │   │
-│  │   • WS: wss://whisperbox.koyeb.app/ws?token=<access_token>  │   │
-│  └──────┬──────────────────────────────────────────────────────┘   │
-└─────────┼───────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────────────┐
+│                          Browser (Client)                             │
+│                                                                       │
+│  ┌─────────────┐    ┌──────────────────┐    ┌───────────────────┐     │
+│  │  React UI   │◄──►│  Zustand Stores  │◄──►│  Web Crypto API   │     │
+│  │  (Vite/TSX) │    │  (auth, crypto,  │    │  (RSA-OAEP +      │     │
+│  │             │    │   presence)      │    │   AES-GCM +       │     │
+│  └──────┬──────┘    └──────────────────┘    │   PBKDF2)         │     │
+│         │                                   └─────────┬─────────┘     │
+│         │           ┌──────────────────┐              │               │
+│         │           │    IndexedDB     │◄─────────────┘               │
+│         │           │  (wrapped keys)  │  persist wrapped             │
+│         │           └──────────────────┘  private key                 │
+│         │                                                             │
+│  ┌──────▼──────────────────────────────────────────────────────┐      │
+│  │                   Axios + WebSocket                         │      │
+│  │   • Bearer token on every request                           │      │
+│  │   • Silent token refresh interceptor (401 → /auth/refresh)  │      │
+│  │   • WS: wss://whisperbox.koyeb.app/ws?token=<access_token>  │      │
+│  └──────┬──────────────────────────────────────────────────────┘      │
+└─────────┼─────────────────────────────────────────────────────────────┘
           │  HTTPS / WSS — ciphertext only, never plaintext
           ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │                    WhisperBox API (koyeb.app)                       │
 │                                                                     │
-│   /auth/*   /users/*   /conversations/*   /messages   /ws          │
+│   /auth/*   /users/*   /conversations/*   /messages   /ws           │
 │                                                                     │
-│   Stores: wrapped_private_key, pbkdf2_salt, public_key (SPKI),     │
+│   Stores: wrapped_private_key, pbkdf2_salt, public_key (SPKI),      │
 │           payload.ciphertext, payload.iv,                           │
 │           payload.encryptedKey, payload.encryptedKeyForSelf         │
 │                                                                     │
@@ -136,7 +136,7 @@ User fills in username, display_name, password
    │    hash: 'SHA-256'                          │
    │  }, extractable: true,                      │
    │  usages: ['encrypt','decrypt',              │
-   │           'wrapKey','unwrapKey'])            │
+   │           'wrapKey','unwrapKey'])           │
    └─────────────────────────────────────────────┘
            │
            ▼
@@ -415,7 +415,7 @@ Copy `.env.example` to `.env`:
 cp .env.example .env
 ```
 
-| Variable         | Default                            | Description          |
-| ---------------- | ---------------------------------- | -------------------- |
-| `VITE_API_URL`   | `https://whisperbox.koyeb.app`     | Backend base URL     |
-| `VITE_WS_URL`    | `wss://whisperbox.koyeb.app/ws`    | WebSocket URL        |
+| Variable       | Default                         | Description      |
+| -------------- | ------------------------------- | ---------------- |
+| `VITE_API_URL` | `https://whisperbox.koyeb.app`  | Backend base URL |
+| `VITE_WS_URL`  | `wss://whisperbox.koyeb.app/ws` | WebSocket URL    |
