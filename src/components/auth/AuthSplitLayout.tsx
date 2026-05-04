@@ -10,10 +10,12 @@ export function AuthSplitLayout({ children }: AuthSplitLayoutProps) {
   return (
     <div className="min-h-screen flex">
       {/* Left panel — form */}
-      <div className="relative flex flex-col w-full lg:w-1/2 bg-bg px-8 py-8 md:px-14">
+      <div className="relative flex flex-col w-full lg:w-1/2 bg-bg px-6 py-8 sm:px-10 md:px-14">
         <Logo />
-        <div className="flex-1 flex flex-col justify-center max-w-sm mt-24 pb-8">
-          {children}
+        <div className="flex-1 flex flex-col items-center lg:items-start justify-center py-8">
+          <div className="w-full max-w-sm">
+            {children}
+          </div>
         </div>
       </div>
 
