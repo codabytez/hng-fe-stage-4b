@@ -39,6 +39,7 @@ export function Sidebar() {
   }
 
   const filtered = conversations.filter((c) => {
+    if (!c.user) return false
     if (!search.trim()) return true
     const q = search.toLowerCase()
     return (

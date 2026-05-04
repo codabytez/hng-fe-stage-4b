@@ -31,14 +31,10 @@ export async function wrapPrivateKey(
 ): Promise<{ wrappedPrivateKey: string; pbkdf2Salt: string }> {
   const salt = crypto.getRandomValues(new Uint8Array(16))
   const wrappingKey = await deriveWrappingKey(password, salt)
+
   const iv = crypto.getRandomValues(new Uint8Array(12))
+  const wrapped = await crypto.subtle.wrapKey('pkcs8', privateKey, wrappingKey, { name: 'AES-GCM', iv })
 
-  const wrapped = await crypto.subtle.wrapKey('pkcs8', privateKey, wrappingKey, {
-    name: 'AES-GCM',
-    iv,
-  })
-
-  // Prepend IV to wrapped key for storage
   const combined = new Uint8Array(iv.byteLength + wrapped.byteLength)
   combined.set(iv, 0)
   combined.set(new Uint8Array(wrapped), iv.byteLength)
