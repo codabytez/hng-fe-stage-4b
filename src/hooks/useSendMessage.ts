@@ -7,6 +7,7 @@ import { usersService } from '@/services/users.service'
 import { messagesService } from '@/services/messages.service'
 import { useAuthStore } from '@/store/auth.store'
 import { useCryptoStore } from '@/store/crypto.store'
+import { useSocketStore } from '@/store/socket.store' // getState() used inside mutationFn
 import { getApiError } from '@/utils/apiError'
 import type { Message } from '@/types/models'
 import type { MessagesPage } from './useMessages'
@@ -18,6 +19,7 @@ interface SendInput {
 
 interface MutationContext {
   tempId: string
+  sentViaWs: boolean
 }
 
 export function useSendMessage() {
@@ -52,7 +54,9 @@ export function useSendMessage() {
         }
       )
 
-      return { tempId }
+      const { ws: currentWs } = useSocketStore.getState()
+      const sentViaWs = !!(currentWs && currentWs.readyState === WebSocket.OPEN)
+      return { tempId, sentViaWs }
     },
 
     mutationFn: async ({ recipientId, plaintext }: SendInput) => {
@@ -63,34 +67,45 @@ export function useSendMessage() {
 
       const encrypted = await encryptMessage(plaintext, recipientPublicKey, publicKey)
 
-      return messagesService.sendMessage({
-        to: recipientId,
-        payload: {
-          ciphertext: encrypted.ciphertext,
-          iv: encrypted.iv,
-          encryptedKey: encrypted.encryptedKey,
-          encryptedKeyForSelf: encrypted.encryptedKeyForSelf,
-        },
-      })
+      const payload = {
+        ciphertext: encrypted.ciphertext,
+        iv: encrypted.iv,
+        encryptedKey: encrypted.encryptedKey,
+        encryptedKeyForSelf: encrypted.encryptedKeyForSelf,
+      }
+
+      const ws = useSocketStore.getState().ws
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        console.log('[send] via WebSocket')
+        ws.send(JSON.stringify({ event: 'message.send', to: recipientId, payload }))
+        return { id: `ws-${Date.now()}`, from_user_id: user.id, to_user_id: recipientId, payload, delivered: false, created_at: new Date().toISOString() } satisfies Message
+      }
+
+      console.log('[send] via HTTP — ws state:', ws?.readyState ?? 'no ws')
+      return messagesService.sendMessage({ to: recipientId, payload })
     },
 
     onSuccess: (sentMsg, { recipientId, plaintext }, context) => {
-      const decryptedMsg: Message = { ...sentMsg, decrypted_content: plaintext }
-
-      qc.setQueryData<InfiniteData<MessagesPage>>(
-        ['messages', recipientId],
-        (old) => {
-          if (!old) return old
-          const pages = old.pages.map((page, i) => {
-            if (i !== 0) return page
-            const filtered = page.messages.filter(
-              (m) => m.id !== context?.tempId && m.id !== decryptedMsg.id
-            )
-            return { ...page, messages: [decryptedMsg, ...filtered] }
-          })
-          return { ...old, pages }
-        }
-      )
+      if (context?.sentViaWs) {
+        // temp stays visible; invalidate so the next fetch brings in the real message
+        qc.invalidateQueries({ queryKey: ['messages', recipientId] })
+      } else {
+        const decryptedMsg: Message = { ...sentMsg, decrypted_content: plaintext }
+        qc.setQueryData<InfiniteData<MessagesPage>>(
+          ['messages', recipientId],
+          (old) => {
+            if (!old) return old
+            const pages = old.pages.map((page, i) => {
+              if (i !== 0) return page
+              const filtered = page.messages.filter(
+                (m) => m.id !== context?.tempId && m.id !== decryptedMsg.id
+              )
+              return { ...page, messages: [decryptedMsg, ...filtered] }
+            })
+            return { ...old, pages }
+          }
+        )
+      }
 
       qc.invalidateQueries({ queryKey: ['conversations'] })
     },

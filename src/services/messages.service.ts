@@ -15,8 +15,9 @@ export const messagesService = {
   getConversations: () =>
     api.get<RawConversation[]>('/conversations').then((r) =>
       r.data.map((raw): Conversation => ({
-        user: { id: raw.user_id, display_name: raw.display_name, username: raw.username, created_at: raw.last_message_at ?? '' },
+        user: { id: raw.user_id, display_name: raw.display_name, username: raw.username, created_at: '' },
         last_message: raw.last_message,
+        last_message_at: raw.last_message_at ?? undefined,
         unread_count: raw.unread_count ?? 0,
       }))
     ),

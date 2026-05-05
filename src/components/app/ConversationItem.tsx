@@ -12,14 +12,15 @@ interface ConversationItemProps {
 
 function previewText(convo: Conversation): string {
   const msg = convo.last_message
-  if (!msg) return 'No messages yet'
-  if (msg.decryption_failed) return '[Encrypted message]'
-  if (msg.decrypted_content) return truncate(msg.decrypted_content, 40)
-  return '…'
+  if (msg?.decryption_failed) return '[Encrypted message]'
+  if (msg?.decrypted_content) return truncate(msg.decrypted_content, 40)
+  if (convo.last_message_at) return 'Encrypted message'
+  return 'No messages yet'
 }
 
 export function ConversationItem({ conversation, active, online }: ConversationItemProps) {
-  const { user, last_message, unread_count } = conversation
+  const { user, last_message, last_message_at, unread_count } = conversation
+  const timestamp = last_message?.created_at ?? last_message_at
 
   return (
     <Link
@@ -34,9 +35,9 @@ export function ConversationItem({ conversation, active, online }: ConversationI
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
           <span className="text-sm font-medium text-text-primary truncate">{user.display_name}</span>
-          {last_message && (
+          {timestamp && (
             <span className="text-xs text-text-muted flex-shrink-0">
-              {formatConversationTime(last_message.created_at)}
+              {formatConversationTime(timestamp)}
             </span>
           )}
         </div>

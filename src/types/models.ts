@@ -26,5 +26,6 @@ export interface Message {
 export interface Conversation {
   user: User
   last_message?: Message
+  last_message_at?: string
   unread_count: number
 }
