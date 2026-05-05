@@ -12,7 +12,7 @@ export function ChatHeader({ user, online }: ChatHeaderProps) {
   const navigate = useNavigate()
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-surface flex-shrink-0">
+    <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-surface shrink-0">
       <button
         onClick={() => navigate('/')}
         className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg text-text-secondary hover:text-text-primary hover:bg-surface-2 transition-colors -ml-1 shrink-0"
