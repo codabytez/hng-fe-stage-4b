@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ConfirmModal } from '@/components/ui/ConfirmModal'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Edit2, SearchNormal1, LogoutCurve } from 'iconsax-reactjs'
+import { MessageAdd1, SearchNormal1, LogoutCurve } from 'iconsax-reactjs'
 import { toast } from 'sonner'
 import { Logo } from '@/components/shared/Logo'
 import { Avatar } from './Avatar'
@@ -48,7 +48,7 @@ export function Sidebar() {
   })
 
   return (
-    <aside className="flex flex-col w-72 border-r border-border bg-surface h-full shrink-0">
+    <aside className="flex flex-col w-full md:w-72 border-r border-border bg-surface h-full shrink-0">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-4 border-b border-border">
         <Logo iconSize={16} />
@@ -57,7 +57,7 @@ export function Sidebar() {
           className="w-8 h-8 flex items-center justify-center rounded-lg text-text-secondary hover:text-text-primary hover:bg-surface-2 transition-colors cursor-pointer"
           aria-label="New conversation"
         >
-          <Edit2 size={16} color="currentColor" />
+          <MessageAdd1 size={18} color="currentColor" />
         </button>
       </div>
 
