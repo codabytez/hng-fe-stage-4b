@@ -76,12 +76,10 @@ export function useSendMessage() {
 
       const ws = useSocketStore.getState().ws
       if (ws && ws.readyState === WebSocket.OPEN) {
-        console.log('[send] via WebSocket')
         ws.send(JSON.stringify({ event: 'message.send', to: recipientId, payload }))
         return { id: `ws-${Date.now()}`, from_user_id: user.id, to_user_id: recipientId, payload, delivered: false, created_at: new Date().toISOString() } satisfies Message
       }
 
-      console.log('[send] via HTTP — ws state:', ws?.readyState ?? 'no ws')
       return messagesService.sendMessage({ to: recipientId, payload })
     },
 

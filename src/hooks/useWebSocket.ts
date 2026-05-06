@@ -51,11 +51,9 @@ export function useWebSocket() {
           return
         }
 
-        console.log('[WS] event received:', parsed.event, parsed)
         if (parsed.event === 'message.receive') {
           const msg = parsed as unknown as Message
           if (isReplay(msg.id, msg.created_at)) {
-            console.warn('[WS] dropped as replay:', msg.id)
             return
           }
           const isSender = msg.from_user_id === currentUser.id
@@ -78,15 +76,11 @@ export function useWebSocket() {
           }
 
           const otherUserId = isSender ? msg.to_user_id : msg.from_user_id
-          console.log('[WS] injecting into cache for user:', otherUserId)
 
           qc.setQueryData<InfiniteData<MessagesPage>>(
             ['messages', otherUserId],
             (old) => {
-              if (!old) {
-                console.warn('[WS] cache miss — no existing data for', otherUserId)
-                return old
-              }
+              if (!old) return old
               const pages = old.pages.map((page, i) => {
                 if (i !== 0) return page
                 if (page.messages.some((m) => m.id === decrypted.id)) return page
@@ -106,13 +100,11 @@ export function useWebSocket() {
       ws.onopen = () => {
         retryDelay = 1_000
         setWs(ws)
-        console.log('[WS] connected')
       }
 
-      ws.onerror = (e) => { console.error('[WS] error', e) }
+      ws.onerror = () => {}
 
       ws.onclose = (e) => {
-        console.warn('[WS] closed — code:', e.code, 'reason:', e.reason)
         wsRef.current = null
         setWs(null)
         if (destroyed) return
