@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Send2, Paperclip, Lock1 } from 'iconsax-reactjs'
+import { Send2, Lock1 } from 'iconsax-reactjs'
 import { cn } from '@/utils/cn'
 
 interface MessageInputProps {
@@ -42,7 +42,7 @@ export function MessageInput({ recipientName, onSend, disabled, sending }: Messa
   return (
     <div className="px-4 py-3 border-t border-border bg-surface">
       <div className="flex items-end gap-3 px-3.5 py-2.5 rounded-xl bg-surface-2 border border-border focus-within:border-teal transition-colors">
-        <Lock1 size={16} color="var(--color-text-muted)" className="flex-shrink-0 mb-0.5" />
+        <Lock1 size={16} color="var(--color-text-muted)" className="shrink-0 mb-0.5" />
 
         <textarea
           ref={textareaRef}
@@ -55,19 +55,11 @@ export function MessageInput({ recipientName, onSend, disabled, sending }: Messa
           className={cn(
             'flex-1 resize-none bg-transparent text-sm text-text-primary placeholder:text-text-muted',
             'focus:outline-none disabled:opacity-50',
-            'min-h-[20px] max-h-[140px] leading-5 py-0.5'
+            'min-h-5 max-h-35 leading-5 py-0.5'
           )}
         />
 
-        <div className="flex items-center gap-1.5 flex-shrink-0">
-          <button
-            type="button"
-            disabled
-            className="w-7 h-7 flex items-center justify-center rounded-lg text-text-muted opacity-40 cursor-not-allowed"
-            aria-label="Attach file"
-          >
-            <Paperclip size={16} color="currentColor" />
-          </button>
+        <div className="flex items-center gap-1.5 shrink-0">
           <button
             type="button"
             onClick={handleSend}
